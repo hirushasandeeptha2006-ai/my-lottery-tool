@@ -4,39 +4,37 @@ import json
 from datetime import datetime
 
 def get_nlb_results():
-    # NLB English Results page
     url = "https://www.nlb.lk/english/results/"
-    headers = {'User-Agent': 'Mozilla/5.0'} # Browser එකක් වගේ පෙන්නන්න
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     
     try:
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.text, 'html.parser')
         results_list = []
         
-        # සයිට් එකේ අලුත්ම structure එකට අනුව දත්ත ගැනීම
-        # අපි බලන්නේ හැම lottery block එකක්ම
-        blocks = soup.find_all('div', class_='result-block')
+        # සයිට් එකේ හැම result block එකක්ම පීරලා බලනවා
+        items = soup.find_all('div', class_='result-block')
         
-        for block in blocks:
-            name_tag = block.find('h3', class_='result-title')
-            if name_tag:
-                name = name_tag.text.strip()
-                # අංක තියෙන span ටික හොයනවා
-                num_nodes = block.find_all('span', class_='num-node')
-                numbers = [n.text.strip() for n in num_nodes if n.text.strip()]
-                
-                if numbers: # අංක තියෙනවා නම් විතරක් එකතු කරගන්න
+        for item in items:
+            try:
+                name = item.find('h3').text.strip()
+                # අංක සහ අකුරු ඔක්කොම ගන්නවා (span වල තියෙන)
+                numbers = [n.text.strip() for n in item.find_all('span') if n.text.strip().isalnum()]
+                date_str = datetime.now().strftime("%Y-%m-%d")
+
+                if name and numbers:
                     results_list.append({
                         "name": name,
                         "numbers": numbers,
-                        "date": datetime.now().strftime("%Y-%m-%d")
+                        "date": date_str
                     })
+            except:
+                continue
         
-        # දත්ත JSON file එකට ලියනවා
         with open('results.json', 'w', encoding='utf-8') as f:
             json.dump(results_list, f, indent=4, ensure_ascii=False)
             
-        print(f"Success! {len(results_list)} lotteries found and saved.")
+        print(f"වැඩේ ගොඩ! ලොතරැයි {len(results_list)} ක දත්ත ලැබුණා.")
 
     except Exception as e:
         print(f"Error: {e}")
