@@ -1,74 +1,36 @@
 <!DOCTYPE html>
-<html lang="si">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL Lottery Master - ප්‍රතිඵල</title>
+    <title>SL Lottery</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Gemunu+Libre:wght@400;700&display=swap');
-        body { font-family: 'Gemunu Libre', sans-serif; }
-    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="bg-blue-800 text-white p-6 shadow-xl mb-6">
-        <div class="max-w-4xl mx-auto text-center">
-            <h1 class="text-4xl font-bold mb-2">Sri Lanka Lottery Hub</h1>
-            <p class="opacity-80 text-lg">අලුත්ම ලොතරැයි ප්‍රතිඵල මෙතැනින් බලන්න</p>
-        </div>
-    </div>
-
-    <div class="max-w-4xl mx-auto px-4 pb-12">
-        <div class="relative mb-8">
-            <input type="text" id="search" placeholder="ලොතරැයි නම මෙතන ගහන්න... (Ex: Mahajana)" 
-                class="w-full p-4 pl-12 rounded-2xl border-none shadow-md text-lg outline-none focus:ring-4 focus:ring-blue-300 transition-all">
-            <svg class="w-6 h-6 absolute left-4 top-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </div>
-
-        <div id="results" class="grid gap-6 md:grid-cols-2">
-            </div>
-    </div>
+<body class="bg-gray-100 p-5">
+    <h1 class="text-2xl font-bold text-center mb-5">Latest Lottery Results</h1>
+    <div id="display" class="grid gap-4 max-w-xl mx-auto"></div>
 
     <script>
-        let allData = [];
-
-        async function fetchResults() {
-            try {
-                const res = await fetch('results.json?v=' + Date.now());
-                allData = await res.json();
-                render(allData);
-            } catch (e) {
-                document.getElementById('results').innerHTML = "<p class='text-center col-span-full'>දත්ත ලබාගැනීමට නොහැක. කරුණාකර Actions Run කරන්න.</p>";
+        async function load() {
+            // results.json පස්සට වෙලාව එකතු කරලා cache එක bypass කරනවා
+            const res = await fetch('results.json?nocache=' + new Date().getTime());
+            const data = await res.json();
+            const div = document.getElementById('display');
+            
+            if(data.length === 0) {
+                div.innerHTML = "<p class='text-center'>No data yet. Please run Actions.</p>";
+                return;
             }
-        }
 
-        function render(data) {
-            const container = document.getElementById('results');
-            container.innerHTML = data.map(item => `
-                <div class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all border-b-4 border-blue-600">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-2xl font-bold text-gray-800">${item.name}</h2>
-                        <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded">නවතම</span>
-                    </div>
-                    <p class="text-gray-500 mb-4">${item.date}</p>
-                    <div class="flex flex-wrap gap-2">
-                        ${item.numbers.map(n => `
-                            <div class="w-12 h-12 flex items-center justify-center bg-blue-600 text-white font-bold rounded-full text-lg shadow-md">
-                                ${n}
-                            </div>
-                        `).join('')}
+            div.innerHTML = data.map(l => `
+                <div class="bg-white p-4 rounded shadow">
+                    <h2 class="font-bold text-lg">${l.name}</h2>
+                    <p class="text-sm text-gray-400">${l.date}</p>
+                    <div class="flex gap-2 mt-2">
+                        ${l.numbers.map(n => `<span class="bg-blue-600 text-white w-8 h-8 flex items-center justify-center rounded-full font-bold">${n}</span>`).join('')}
                     </div>
                 </div>
             `).join('');
         }
-
-        document.getElementById('search').addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase();
-            const filtered = allData.filter(i => i.name.toLowerCase().includes(val));
-            render(filtered);
-        });
-
-        fetchResults();
+        load();
     </script>
 </body>
 </html>
