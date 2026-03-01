@@ -5,36 +5,48 @@ from datetime import datetime
 
 def get_nlb_results():
     url = "https://www.nlb.lk/english/results/"
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+    # Browser එකකින් එනවා වගේ පෙන්නන්න header එකක් දානවා
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'}
     
     try:
         response = requests.get(url, headers=headers)
         soup = BeautifulSoup(response.text, 'html.parser')
         results_list = []
         
-        # සයිට් එකේ හැම result block එකක්ම පීරලා බලනවා
-        items = soup.find_all('div', class_='result-block')
+        # සයිට් එකේ හැම result block එකක්ම පීරනවා
+        blocks = soup.select('.result-block') 
         
-        for item in items:
+        if not blocks:
+            # වෙනත් විදියකට උත්සාහ කරමු
+            blocks = soup.find_all('div', {'class': 'result-block'})
+
+        for block in blocks:
             try:
-                name = item.find('h3').text.strip()
-                # අංක සහ අකුරු ඔක්කොම ගන්නවා (span වල තියෙන)
-                numbers = [n.text.strip() for n in item.find_all('span') if n.text.strip().isalnum()]
-                date_str = datetime.now().strftime("%Y-%m-%d")
+                # ලොතරැයි නම
+                name = block.find('h3').text.strip()
+                
+                # දිනුම් අංක සහ අකුරු
+                # span එකේ තියෙන හැම අකුරක්/අංකයක්ම ගන්නවා
+                numbers = [n.text.strip() for n in block.find_all('span') if n.text.strip()]
+                
+                # date එක සයිට් එකෙන්ම ගන්න උත්සාහ කරනවා, නැත්නම් අද දිනය දානවා
+                date_tag = block.find('p', class_='result-date')
+                date_val = date_tag.text.strip() if date_tag else datetime.now().strftime("%Y-%m-%d")
 
                 if name and numbers:
                     results_list.append({
                         "name": name,
                         "numbers": numbers,
-                        "date": date_str
+                        "date": date_val
                     })
-            except:
+            except Exception as e:
                 continue
         
+        # JSON එකට save කරනවා
         with open('results.json', 'w', encoding='utf-8') as f:
             json.dump(results_list, f, indent=4, ensure_ascii=False)
             
-        print(f"වැඩේ ගොඩ! ලොතරැයි {len(results_list)} ක දත්ත ලැබුණා.")
+        print(f"සාර්ථකයි! ලොතරැයි {len(results_list)}ක් හමු වුණා.")
 
     except Exception as e:
         print(f"Error: {e}")
