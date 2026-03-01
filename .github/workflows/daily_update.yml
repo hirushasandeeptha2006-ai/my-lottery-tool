@@ -32,37 +32,5 @@ jobs:
           git add results.json
           git commit -m "Daily lottery results update" || exit 0
           git push
-          name: Ultimate Lottery Scraper
 
-on:
-  schedule:
-    - cron: '0 16 * * *' # ලංකාවේ වෙලාවෙන් රෑ 9:30 ට
-  workflow_dispatch:
-
-jobs:
-  run-scraper:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # මේක තමයි රහස!
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install Dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run Scraper
-        run: python scraper.py
-
-      - name: Commit Results
-        run: |
-          git config --global user.name 'LotteryBot'
-          git config --global user.email 'bot@lottery.com'
-          git add results.json
-          git commit -m "Auto Update: $(date)" || exit 0
-          git push
+          
