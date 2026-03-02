@@ -32,5 +32,24 @@
         }
         load();
     </script>
+    
+    <div id="lottery-results">ප්‍රතිඵල ලෝඩ් වෙනවා...</div>
+
+<script>
+    // GitHub එකේ තියෙන ඔයාගේ JSON file එකේ link එක මෙතනට දාන්න
+    const jsonUrl = 'https://github.com/hirushasandeeptha2006-ai/my-lottery-tool/blob/main/results.json';
+
+    fetch(jsonUrl)
+        .then(response => response.json())
+        .then(data => {
+            let html = '<h3>Last Updated: ' + data.last_updated + '</h3><ul>';
+            data.lotteries.forEach(lot => {
+                html += `<li><strong>${lot.name}:</strong> ${lot.letter} - ${lot.numbers}</li>`;
+            });
+            html += '</ul>';
+            document.getElementById('lottery-results').innerHTML = html;
+        })
+        .catch(err => console.error('Error fetching results:', err));
+</script>
 </body>
 </html>
