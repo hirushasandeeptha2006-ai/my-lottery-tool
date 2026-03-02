@@ -1,1 +1,15 @@
-[]
+{
+    "last_updated": "2026-03-02 07:05:15",
+    "lotteries": [
+        {
+            "name": "Mahajana Sampatha",
+            "numbers": "12, 45, 67, 89",
+            "letter": "A"
+        },
+        {
+            "name": "Govisetha",
+            "numbers": "05, 22, 34, 56",
+            "letter": "G"
+        }
+    ]
+}
